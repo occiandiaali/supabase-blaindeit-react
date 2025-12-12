@@ -1,5 +1,7 @@
 import { useState } from "react";
 import fakeUsers from "../../data/fakeUsers";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 import "./Members.css";
 
@@ -7,8 +9,17 @@ export default function Members() {
   const [scene, setScene] = useState("");
   const [duration, setDuration] = useState("");
   const [startDate, setStartDate] = useState("");
+  const [startTime, setStartTime] = useState("");
 
   const [members, setMembers] = useState([]);
+  const [date, setDate] = useState(new Date());
+  const highlitDates = [
+    new Date(2025, 11, 14),
+    new Date(2025, 11, 15),
+    new Date(2025, 11, 16),
+    new Date(2025, 11, 19),
+    new Date(2025, 11, 24),
+  ];
 
   const [obj, setObj] = useState({
     name: "",
@@ -37,22 +48,24 @@ export default function Members() {
   };
 
   const handleSelectionChange = () => {
-    let date = new Date(startDate);
-    date.setMinutes(date.getMinutes() + duration);
-    let updated = date.toISOString().substr(11, 8);
+    // let date = new Date(startDate);
+    // date.setMinutes(date.getMinutes() + duration);
+    // let updated = date.toISOString().substr(11, 8);
 
     const newBooking = {
       guest: obj.name,
       sceneType: scene,
       timeLimit: duration,
-      startDate,
-      startTime: new Date(startDate).toLocaleTimeString("en-NG"),
-      endTime: updated,
+      startDate: date,
+      startTime,
+      // startTime: new Date(startDate).toLocaleTimeString("en-NG"),
+      // endTime: updated,
     };
     console.log("Booked: ", newBooking);
     setScene("");
     setDuration("");
     setStartDate("");
+    setStartTime("");
   };
 
   return (
@@ -152,21 +165,30 @@ export default function Members() {
                 {obj.status}
               </span>
               <br />
-              <span className="fst-italic fs-6">{obj.fact}</span>
-              <div>
-                <select
-                  className="form-select"
-                  aria-label="Default select example"
-                  value={scene}
-                  onChange={(e) => setScene(e.target.value)}
-                >
-                  <option value="">Choose a scene</option>
-
-                  <option value="Scene One">Scene One</option>
-                  <option value="Scene Two">Scene Two</option>
-                  <option value="Scene Three">Scene Three</option>
-                </select>
+              <label htmlFor="VN">Hear {obj.name}'s voice</label>
+              <div style={{ textAlign: "center" }}>
+                <audio id="VN" controls>
+                  <source src="your-audio-file.mp3" type="audio/mpeg" />
+                  Your browser does not support playing audio.
+                </audio>
               </div>
+
+              <span className="fst-italic fs-6">{obj.fact}</span>
+              <br />
+
+              <select
+                className="form-select"
+                aria-label="Default select example"
+                value={scene}
+                onChange={(e) => setScene(e.target.value)}
+              >
+                <option value="">Choose a scene</option>
+
+                <option value="Scene One">Scene One</option>
+                <option value="Scene Two">Scene Two</option>
+                <option value="Scene Three">Scene Three</option>
+              </select>
+
               <br />
 
               <label>Select a duration</label>
@@ -229,12 +251,35 @@ export default function Members() {
 
               <br />
               <div>
-                <label>Select a date</label>
+                <label>Days {obj.name} is available</label>
+                <div style={{ marginLeft: "15%" }}>
+                  <Calendar
+                    onChange={setDate}
+                    value={date}
+                    tileClassName={({ date, view }) => {
+                      if (
+                        highlitDates.find(
+                          (d) => d.toDateString() === date.toDateString()
+                        )
+                      ) {
+                        return "highlight";
+                      }
+                    }}
+                  />
+                </div>
                 <br />
-                <input
+                <label>Select a time</label>
+                <br />
+                {/* <input
                   type={"datetime-local"}
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                /> */}
+                <input
+                  type={"time"}
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
                 />
               </div>
               <br />
