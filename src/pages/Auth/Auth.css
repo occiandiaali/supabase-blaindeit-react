@@ -1,0 +1,30 @@
+.bg-vid {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+  z-index: 0;
+}
+.wrapperDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* max-width: 340px;
+  height: 350px; */
+  max-height: 450px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: rgb(156, 167, 167);
+  position: relative;
+  z-index: 1;
+}
+
+.inputField {
+  margin: 4px;
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+}
