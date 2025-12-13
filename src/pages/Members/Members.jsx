@@ -1,7 +1,10 @@
 import { useState } from "react";
 import fakeUsers from "../../data/fakeUsers";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+// import Calendar from "react-calendar";
+// import "react-calendar/dist/Calendar.css";
+import CustomCalendar from "../../components/CustomCalendar";
+import addMinutes from "../../helpers/addMinutes";
+import createSecureRandomString from "../../helpers/createSecureRandomString";
 
 import "./Members.css";
 
@@ -13,15 +16,27 @@ export default function Members() {
 
   const [members, setMembers] = useState([]);
   const [date, setDate] = useState(new Date());
+  // const highlitDates = [
+  //   new Date(2025, 11, 14),
+  //   new Date(2025, 11, 15),
+  //   new Date(2025, 11, 16),
+  //   new Date(2025, 11, 19),
+  //   new Date(2025, 11, 24),
+  // ];
   const highlitDates = [
-    new Date(2025, 11, 14),
-    new Date(2025, 11, 15),
-    new Date(2025, 11, 16),
-    new Date(2025, 11, 19),
-    new Date(2025, 11, 24),
+    "2025-12-14",
+    "2025-12-15",
+    "2025-12-16",
+    "2025-12-19",
+    "2025-12-24",
   ];
 
+  const handleSetStartDate = (newData) => {
+    setStartDate(newData);
+  };
+
   const [obj, setObj] = useState({
+    id: "",
     name: "",
     image: "",
     fact: "",
@@ -29,7 +44,7 @@ export default function Members() {
     status: "",
   });
 
-  const injectToModal = (n, i, f, g, s) => {
+  const injectToModal = (id, n, i, f, g, s) => {
     // setObj((prevObj) => ({
     //   ...prevObj,
     //   name: n,
@@ -39,6 +54,7 @@ export default function Members() {
     //   status: s,
     // }));
     setObj({
+      id: id,
       name: n,
       image: i,
       fact: f,
@@ -48,23 +64,25 @@ export default function Members() {
   };
 
   const handleSelectionChange = () => {
-    // let date = new Date(startDate);
-    // date.setMinutes(date.getMinutes() + duration);
-    // let updated = date.toISOString().substr(11, 8);
-
+    const roomID = createSecureRandomString(10);
     const newBooking = {
+      roomId: roomID,
+      me: "currentUser",
       guest: obj.name,
       sceneType: scene,
       timeLimit: duration,
-      startDate: date,
+      //startDate: date,
+      startDate,
       startTime,
-      // startTime: new Date(startDate).toLocaleTimeString("en-NG"),
-      // endTime: updated,
+
+      endTime: addMinutes(startTime, +duration),
+      participant_ids: ["Jk09_pp33M__", obj.id],
+      participant_usernames: ["currentUser", obj.name],
     };
     console.log("Booked: ", newBooking);
     setScene("");
     setDuration("");
-    setStartDate("");
+    // setStartDate("");
     setStartTime("");
   };
 
@@ -111,6 +129,7 @@ export default function Members() {
                   className="btn btn-outline-dark"
                   onClick={() =>
                     injectToModal(
+                      m.id,
                       m.username,
                       m.avatar_url,
                       m.fun_fact,
@@ -139,9 +158,9 @@ export default function Members() {
         <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="reqModalLabel">
+              <h6 className="modal-title" id="reqModalLabel">
                 Schedule a date with {obj.name} ({obj.gender})
-              </h5>
+              </h6>
               <button
                 type="button"
                 className="btn-close"
@@ -166,8 +185,8 @@ export default function Members() {
               </span>
               <br />
               <label htmlFor="VN">Hear {obj.name}'s voice</label>
-              <div style={{ textAlign: "center" }}>
-                <audio id="VN" controls>
+              <div style={{ textAlign: "center" }} id="VN">
+                <audio controls>
                   <source src="your-audio-file.mp3" type="audio/mpeg" />
                   Your browser does not support playing audio.
                 </audio>
@@ -179,6 +198,7 @@ export default function Members() {
               <select
                 className="form-select"
                 aria-label="Default select example"
+                id="sceneSelect"
                 value={scene}
                 onChange={(e) => setScene(e.target.value)}
               >
@@ -191,9 +211,9 @@ export default function Members() {
 
               <br />
 
-              <label>Select a duration</label>
+              <label htmlFor="durationDiv">Select a duration</label>
               <br />
-              <div>
+              <div id="durationDiv">
                 <div className="form-check form-check-inline">
                   <input
                     className="form-check-input"
@@ -251,9 +271,9 @@ export default function Members() {
 
               <br />
               <div>
-                <label>Days {obj.name} is available</label>
-                <div style={{ marginLeft: "15%" }}>
-                  <Calendar
+                <label>Days {obj.name} is available this month</label>
+                <div style={{ marginLeft: "5%" }}>
+                  {/* <Calendar
                     onChange={setDate}
                     value={date}
                     tileClassName={({ date, view }) => {
@@ -265,6 +285,10 @@ export default function Members() {
                         return "highlight";
                       }
                     }}
+                  /> */}
+                  <CustomCalendar
+                    dates={highlitDates}
+                    onDataChange={handleSetStartDate}
                   />
                 </div>
                 <br />

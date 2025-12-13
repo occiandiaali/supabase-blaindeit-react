@@ -9,9 +9,16 @@ export default function Auth() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState(18);
   const [funFact, setFunFact] = useState("");
   const [isNewMember, setIsNewMember] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
 
   const handleIsNewMember = () => {
     setIsNewMember((prev) => !prev);
@@ -19,7 +26,26 @@ export default function Auth() {
 
   const handleLogin = async () => {};
 
-  const handleRegister = async () => {};
+  const handleRegister = async () => {
+    const newMember = {
+      username,
+      email,
+      password,
+      confirmPassword,
+      gender,
+      age,
+      funFact,
+    };
+    // localStorage.setItem("new", JSON.stringify(newMember));
+    // console.log("Registered ", newMember);
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setGender("");
+    setAge(18);
+    setFunFact("");
+  };
 
   return (
     <>
@@ -34,7 +60,7 @@ export default function Auth() {
           height="44"
           className="d-inline-block align-text-top"
         />
-        <h3>{isNewMember ? "Join us" : "Sign in"}</h3>
+        <h5>{isNewMember ? "Join us" : "Sign in"}</h5>
 
         <form
           className="form-widget"
@@ -64,8 +90,63 @@ export default function Auth() {
               required
             />
           </div>
-          <div className="mb-2">
-            {isNewMember ? (
+          {isNewMember ? (
+            <div className="mb-2">
+              <label
+                style={{
+                  display: "flex",
+                  justifyContent: "left",
+
+                  fontSize: "16px",
+                }}
+              >
+                I am:
+              </label>
+
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="gender"
+                  id="male"
+                  value="Male"
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                <label className="form-check-label" htmlFor="male">
+                  Male
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="gender"
+                  id="female"
+                  value="Female"
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                <label className="form-check-label" htmlFor="female">
+                  Female
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <input
+                  style={{ width: "54px" }}
+                  type={"number"}
+                  name="age"
+                  id="age"
+                  min={18}
+                  max={100}
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                />{" "}
+                <label style={{ fontSize: "14px" }}> years old</label>
+              </div>
+            </div>
+          ) : null}
+          {isNewMember ? (
+            <div className="mb-2">
               <textarea
                 className="form-control fs-6"
                 id="funFact"
@@ -75,18 +156,32 @@ export default function Auth() {
                 onChange={(e) => setFunFact(e.target.value)}
                 required
               ></textarea>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
           <div className="mb-2">
             <input
-              type={"password"}
+              type={isPasswordVisible ? "text" : "password"}
               id="password"
               value={password}
               className="form-control fs-6"
-              placeholder="Password"
+              placeholder="Enter your Password"
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {isNewMember && (
+              <i
+                className={isPasswordVisible ? "bi bi-eye" : "bi bi-eye-slash"}
+                style={{
+                  float: "right",
+                  position: "absolute",
+                  right: "30%",
+                  bottom: "35%",
+                  cursor: "pointer",
+                }}
+                onClick={togglePasswordVisibility}
+              ></i>
+            )}
+
             {isNewMember ? (
               <span style={{ fontSize: "12px", color: "red" }}>
                 (Min. 8 alphanumeric e.g. 99Kw_Bu!)

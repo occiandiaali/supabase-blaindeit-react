@@ -21,7 +21,7 @@ function MainComponent() {
         <Route path="/account" element={<Account />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/not-found" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
@@ -31,7 +31,7 @@ function App() {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    setSession(true);
+    setSession(false);
   }, []);
 
   return (
