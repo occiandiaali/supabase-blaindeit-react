@@ -3,7 +3,12 @@ import "./Navbar.css";
 //import logo from "/src/images/nobg-logo.png";
 import appLogo from "/src/images/blindate-logo-nobg.png";
 
-export default function Navbar() {
+import { supabase } from "../../supabaseClient";
+
+export default function Navbar({ session }) {
+  const { user } = session;
+  // console.log("Navbar user ", user.user_metadata.username);
+
   return (
     <nav className="navbar fixed-top navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
@@ -67,8 +72,12 @@ export default function Navbar() {
                   width={"20px"}
                   height={"20px"}
                   style={{ borderRadius: "100%" }}
-                  src="https://ionicframework.com/docs/img/demos/avatar.svg"
-                  alt="user"
+                  // src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                  src={
+                    user.user_metadata.avatar_url ||
+                    "https://picsum.photos/100/100?random=12"
+                  }
+                  alt={user.user_metadata.username || "user"}
                 />
               </a>
               <ul
@@ -76,7 +85,9 @@ export default function Navbar() {
                 aria-labelledby="navbarDropdownMenuLink"
               >
                 <li>
-                  <span style={{ padding: "8px" }}>Hi, @username</span>
+                  <span style={{ padding: "8px" }}>
+                    Hi, {user.user_metadata.username}
+                  </span>
                 </li>
                 <li>
                   <hr className="dropdown-divider" />
@@ -102,18 +113,22 @@ export default function Navbar() {
                     className={({ isActive }) =>
                       isActive ? "dropdown-item active" : "nav-link"
                     }
-                    to="/chats"
+                    to="/"
                   >
-                    Chats
+                    FAQs
                   </NavLink>
                 </li>
                 <li>
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/logout">
+                  <span
+                    className="dropdown-item"
+                    role="button"
+                    onClick={() => supabase.auth.signOut()}
+                  >
                     SignOut
-                  </Link>
+                  </span>
                 </li>
               </ul>
             </li>

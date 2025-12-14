@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fakeUsers from "../../data/fakeUsers";
 // import Calendar from "react-calendar";
 // import "react-calendar/dist/Calendar.css";
@@ -6,9 +6,12 @@ import CustomCalendar from "../../components/CustomCalendar";
 import addMinutes from "../../helpers/addMinutes";
 import createSecureRandomString from "../../helpers/createSecureRandomString";
 
+import { supabase } from "../../supabaseClient";
+
 import "./Members.css";
 
-export default function Members() {
+export default function Members({ session }) {
+  const [loading, setLoading] = useState(true);
   const [scene, setScene] = useState("");
   const [duration, setDuration] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -42,9 +45,11 @@ export default function Members() {
     fact: "",
     gender: "",
     status: "",
+    age: "",
+    available: [],
   });
 
-  const injectToModal = (id, n, i, f, g, s) => {
+  const injectToModal = (id, n, i, f, g, s, a, av) => {
     // setObj((prevObj) => ({
     //   ...prevObj,
     //   name: n,
@@ -60,6 +65,8 @@ export default function Members() {
       fact: f,
       gender: g,
       status: s,
+      age: a,
+      available: av,
     });
   };
 
@@ -74,10 +81,10 @@ export default function Members() {
       //startDate: date,
       startDate,
       startTime,
-
       endTime: addMinutes(startTime, +duration),
       participant_ids: ["Jk09_pp33M__", obj.id],
       participant_usernames: ["currentUser", obj.name],
+      status: "valid", // "valid"|"invalid"
     };
     console.log("Booked: ", newBooking);
     setScene("");
@@ -86,14 +93,47 @@ export default function Members() {
     setStartTime("");
   };
 
+  useEffect(() => {
+    // let ignore = false;
+    async function getProfile() {
+      setLoading(true);
+      const { user } = session;
+
+      const { data, error } = await supabase.from("profiles").select();
+      console.log(data);
+
+      setMembers(fakeUsers.concat(data));
+      console.log(members);
+
+      // if (!ignore) {
+      //   if (error) {
+      //     console.warn(error);
+      //   } else if (data) {
+      //     setUsername(data.username);
+      //     setAge(data.age);
+      //     // setWebsite(data.website);
+      //     setAvatarUrl(data.avatar_url);
+      //   }
+      // }
+
+      setLoading(false);
+    }
+
+    getProfile();
+
+    // return () => {
+    //   ignore = true;
+    // };
+  }, [session]);
+
   return (
     <div className="container">
       <div className="grid">
         {/* {Array.from({ length: 20 }, (_, index) => (
 
         ))} */}
-        {fakeUsers ? (
-          fakeUsers.map((m) => (
+        {members ? (
+          members.map((m) => (
             <div
               className="user-card text-center"
               style={{ background: "lightgray" }}
@@ -134,7 +174,9 @@ export default function Members() {
                       m.avatar_url,
                       m.fun_fact,
                       m.gender,
-                      m.status
+                      m.status,
+                      m.age,
+                      m.available_days
                     )
                   }
                 >
@@ -193,7 +235,8 @@ export default function Members() {
               </div>
 
               <span className="fst-italic fs-6">{obj.fact}</span>
-              <br />
+
+              <h6 className="mt-4">Book a scene, duration, day & time</h6>
 
               <select
                 className="form-select"
@@ -271,7 +314,14 @@ export default function Members() {
 
               <br />
               <div>
-                <label>Days {obj.name} is available this month</label>
+                <label>{obj.name}'s available days this month</label>
+                <br />
+                <span
+                  className="fst-italic text-muted"
+                  style={{ fontSize: "12px" }}
+                >
+                  Click purple highlight to select/deselect
+                </span>
                 <div style={{ marginLeft: "5%" }}>
                   {/* <Calendar
                     onChange={setDate}
@@ -287,7 +337,7 @@ export default function Members() {
                     }}
                   /> */}
                   <CustomCalendar
-                    dates={highlitDates}
+                    dates={obj.available || highlitDates}
                     onDataChange={handleSetStartDate}
                   />
                 </div>

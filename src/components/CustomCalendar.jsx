@@ -81,11 +81,11 @@ const CustomCalendar = ({ dates, onDataChange }) => {
                 cursor: "pointer",
                 border: "1px solid #ccc",
                 backgroundColor: isSelected
-                  ? "orange"
+                  ? "#6958b8ff"
                   : isHighlighted
-                  ? "lightblue"
+                  ? "#a599dbff"
                   : isWeekend
-                  ? "#cac7c7ff" // gray for weekends
+                  ? "#d3d3cfff" //"#cac7c7ff" // gray for weekends
                   : "white",
               }}
             >

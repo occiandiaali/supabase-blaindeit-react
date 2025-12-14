@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, Outlet, Routes, Route } from "react-router";
+import { Routes, Route, data } from "react-router";
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import Auth from "./pages/Auth/Auth";
@@ -10,15 +10,17 @@ import Schedule from "./pages/Schedule/Schedule";
 import Notifications from "./pages/Notifications/Notifications";
 import NotFound from "./pages/NotFound/NotFound";
 
+import { supabase } from "./supabaseClient";
+
 import "./App.css";
 
-function MainComponent() {
+function MainComponent({ session }) {
   return (
     <>
-      <Navbar />
+      <Navbar session={session} />
       <Routes>
-        <Route path="/" element={<Members />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/" element={<Members session={session} />} />
+        <Route path="/account" element={<Account session={session} />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="*" element={<NotFound />} />
@@ -31,12 +33,23 @@ function App() {
   const [session, setSession] = useState(null);
 
   useEffect(() => {
-    setSession(false);
+    // setSession(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
   }, []);
 
   return (
     <div className="container" style={{ padding: "50px 0 100px 0" }}>
-      {!session ? <Auth /> : <MainComponent />}
+      {!session ? (
+        <Auth />
+      ) : (
+        <MainComponent key={session.user.id} session={session} />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-//import { supabase } from "../../supabaseClient";
+import { supabase } from "../../supabaseClient";
 import BgVideo from "/src/videos/video-bg.mp4";
 import appLogo from "/src/images/blindate-logo-nobg.png";
 import "./Auth.css";
@@ -24,27 +24,75 @@ export default function Auth() {
     setIsNewMember((prev) => !prev);
   };
 
-  const handleLogin = async () => {};
+  const handleLogin = async (event) => {
+    event.preventDefault();
 
-  const handleRegister = async () => {
-    const newMember = {
-      username,
-      email,
-      password,
-      confirmPassword,
-      gender,
-      age,
-      funFact,
-    };
-    // localStorage.setItem("new", JSON.stringify(newMember));
-    // console.log("Registered ", newMember);
-    setUsername("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setGender("");
-    setAge(18);
-    setFunFact("");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+      if (error) throw error;
+      //  alert("Welcome, ", data.user);
+      console.log("Success ", data.user.user_metadata);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+
+    try {
+      setLoading(true);
+      // const newMember = {
+      //   username,
+      //   email,
+      //   password,
+      //   confirmPassword,
+      //   gender,
+      //   age,
+      //   funFact,
+      // };
+      // localStorage.setItem("new", JSON.stringify(newMember));
+      // console.log("Registered ", newMember);
+      const { data, error: RegErr } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+            gender: gender,
+            age: age,
+            fun_fact: funFact,
+            avatar_url: "https://ionicframework.com/docs/img/demos/avatar.svg",
+            voice_note: "",
+          },
+        },
+      });
+
+      if (RegErr) {
+        console.error(RegErr);
+        alert(`Error: ${RegErr.message}`);
+        return;
+      }
+      if (data) {
+        alert("Successfully registered!");
+        console.log("User registered ", data.user);
+
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        // setConfirmPassword("");
+        setGender("");
+        setAge(18);
+        setFunFact("");
+      }
+    } catch (error) {
+      console.error("catch error ", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -100,7 +148,16 @@ export default function Auth() {
                   fontSize: "16px",
                 }}
               >
-                I am:
+                I am:{" "}
+                <span
+                  style={{
+                    fontSize: "10px",
+                    color: "red",
+                    margin: "4px 0 0 4px",
+                  }}
+                >
+                  (Gender & Age are used for match-making)
+                </span>
               </label>
 
               <div className="form-check form-check-inline">
@@ -145,6 +202,7 @@ export default function Auth() {
               </div>
             </div>
           ) : null}
+
           {isNewMember ? (
             <div className="mb-2">
               <textarea
@@ -168,27 +226,28 @@ export default function Auth() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {isNewMember && (
-              <i
-                className={isPasswordVisible ? "bi bi-eye" : "bi bi-eye-slash"}
-                style={{
-                  float: "right",
-                  position: "absolute",
-                  right: "30%",
-                  bottom: "35%",
-                  cursor: "pointer",
-                }}
-                onClick={togglePasswordVisibility}
-              ></i>
-            )}
+            {/* {isNewMember && (
+
+            )} */}
 
             {isNewMember ? (
-              <span style={{ fontSize: "12px", color: "red" }}>
-                (Min. 8 alphanumeric e.g. 99Kw_Bu!)
-              </span>
+              <>
+                <span
+                  style={{ fontSize: "12px", color: "red", marginRight: "6px" }}
+                >
+                  (Min. 8 alphanumeric e.g. 99Kw_Bu!)
+                </span>
+                <i
+                  role="button"
+                  className={
+                    isPasswordVisible ? "bi bi-eye" : "bi bi-eye-slash"
+                  }
+                  onClick={togglePasswordVisibility}
+                ></i>
+              </>
             ) : null}
           </div>
-          {isNewMember ? (
+          {/* {isNewMember ? (
             <div className="mb-2">
               <input
                 type="password"
@@ -200,7 +259,7 @@ export default function Auth() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
-          ) : null}
+          ) : null} */}
           <div>
             <button className={"btn btn-outline-dark mt-2"} disabled={loading}>
               {loading ? (

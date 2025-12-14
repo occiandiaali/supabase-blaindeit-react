@@ -7,6 +7,14 @@
   object-fit: cover;
   z-index: 0;
 }
+/* #bi-eyes {
+  float: "right";
+  position: "absolute";
+  right: "30%";
+  bottom: "28%";
+  cursor: "pointer";
+} */
+
 .wrapperDiv {
   display: flex;
   flex-direction: column;
@@ -17,7 +25,8 @@
   max-height: 540px;
   padding: 8px;
   border-radius: 6px;
-  background-color: rgb(156, 167, 167);
+  background-color: rgb(202, 206, 206);
+  opacity: 0.94;
   position: relative;
   z-index: 1;
 }
