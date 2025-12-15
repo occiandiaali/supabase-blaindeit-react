@@ -322,8 +322,8 @@ export default function Members({ session }) {
               >
                 <option value="">Choose a scene</option>
 
-                <option value="Scene One">Scene One</option>
-                <option value="Scene Two">Scene Two</option>
+                <option value="haunted_interior">Haunted Interior</option>
+                <option value="cordelia_park">Cordelia Park</option>
                 <option value="Scene Three">Scene Three</option>
               </select>
 

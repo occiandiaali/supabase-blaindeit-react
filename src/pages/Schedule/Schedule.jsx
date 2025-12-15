@@ -101,6 +101,18 @@ export default function Schedule() {
   const [thisUserID, setThisUserID] = useState(null);
   const [schedule, setSchedule] = useState([]);
 
+  const [scene, setScene] = useState(null);
+  const [roomid, setRoomid] = useState(null);
+  const [limit, setLimit] = useState(null);
+  const [usernames, setUsernames] = useState(null);
+
+  const injectToFrame = (s, r, l, u) => {
+    setScene(s);
+    setRoomid(r);
+    setLimit(l);
+    setUsernames(u);
+  };
+
   const getCurrentUserID = async () => {
     const {
       data: { user },
@@ -138,14 +150,18 @@ export default function Schedule() {
     }
   };
 
-  const removeItem = async (id) => {
+  const removeItem = (id) => {
     try {
       if (confirm("Are you sure you want to delete this?")) {
-        const response = await supabase.from("meetings").delete().eq("id", id);
-        if (response.status === 204) {
-          // alert("Removed item.");
-          window.location.reload();
-        }
+        supabase
+          .from("meetings")
+          .delete()
+          .eq("id", id)
+          .then(() => {
+            alert("Removed item forever.");
+            window.location.reload();
+          })
+          .catch((e) => console.error(e));
       }
     } catch (error) {
       console.error(error);
@@ -159,15 +175,15 @@ export default function Schedule() {
   return (
     <div>
       <ul className="list-group">
-        {loading && (
+        {/* {loading && (
           <p className="card-text placeholder-glow">
             <span className="placeholder col-12"></span>
             <span className="placeholder col-12"></span>
             <span className="placeholder col-12"></span>
           </p>
-        )}
+        )} */}
         {schedule.length > 0 ? (
-          schedule.map((s, i) => (
+          schedule.map((s) => (
             <li
               key={s.id}
               className="list-group-item d-flex justify-content-between align-items-center"
@@ -175,7 +191,7 @@ export default function Schedule() {
               {s.participant_usernames.join(" & ")} on {s.start_date} for{" "}
               {s.time_limit} mins from {s.start_time}
               <div className="p-2">
-                RoomID
+                <span style={{ fontSize: "12px", color: "gray" }}>RoomID</span>
                 <span className="badge bg-primary rounded-pill m-2">
                   {s.room_id}
                 </span>
@@ -184,6 +200,14 @@ export default function Schedule() {
                   className="btn btn-success btn-sm m-1"
                   data-bs-toggle="modal"
                   data-bs-target="#iframeModal"
+                  onClick={() =>
+                    injectToFrame(
+                      s.scene_type,
+                      s.room_id,
+                      s.time_limit,
+                      s.participant_usernames
+                    )
+                  }
                 >
                   Join
                 </button>
@@ -220,10 +244,30 @@ export default function Schedule() {
                 data-bs-dismiss="modal"
                 aria-label="Close"
                 style={{ opacity: 1 }}
+                onClick={() => window.location.reload()}
               ></button>
             </div>
             <div className="modal-body">
-              <h5>Popover in a modal</h5>
+              <div className="meeting-live-area">
+                <iframe
+                  src={
+                    scene === "cordelia_park"
+                      ? "https://playcanv.as/p/kkYFilt6/"
+                      : scene === "haunted_interior"
+                      ? `https://playcanv.as/p/1KTW8pdN/?room_id=${encodeURIComponent(
+                          roomid
+                        )}&duration=${encodeURIComponent(
+                          limit
+                        )}&participant_usernames=${encodeURIComponent(
+                          usernames
+                        )}`
+                      : null
+                  }
+                  className="meeting-iframe"
+                  allow="fullscreen; autoplay; microphone; camera;xr-spatial-tracking"
+                ></iframe>
+              </div>
+              {/* <h5>Popover in a modal</h5>
               <p>
                 This{" "}
                 <a
@@ -256,7 +300,7 @@ export default function Schedule() {
                   that link
                 </a>{" "}
                 have tooltips on hover.
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
