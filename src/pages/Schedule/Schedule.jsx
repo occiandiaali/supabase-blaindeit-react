@@ -1,31 +1,205 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../../supabaseClient";
+
+import "./Schedule.css";
+
+// export default function Schedule() {
+//   return (
+//     <div>
+//       <ul className="list-group">
+//         {Array.from({ length: 5 }, (_, index) => (
+//           <li
+//             key={index}
+//             className="list-group-item d-flex justify-content-between align-items-center"
+//           >
+//             Item {index}
+//             <div className="p-2">
+//               <span className="badge bg-primary rounded-pill m-2">
+//                 {index * 2}
+//               </span>
+//               <button
+//                 type="button"
+//                 className="btn btn-success btn-sm m-1"
+//                 data-bs-toggle="modal"
+//                 data-bs-target="#iframeModal"
+//               >
+//                 Join
+//               </button>
+//               <button type="button" className="btn btn-danger btn-sm m-1">
+//                 Cancel
+//               </button>
+//             </div>
+//           </li>
+//         ))}
+//       </ul>
+//       {/**Fullscreen modal */}
+//       <div
+//         className="modal fade"
+//         id="iframeModal"
+//         tabIndex="-1"
+//         aria-hidden="true"
+//       >
+//         <div className="modal-dialog modal-fullscreen">
+//           <div className="modal-content">
+//             <div className="modal-header" style={{ opacity: 0.5 }}>
+//               {/* <h5 className="modal-title" id="exampleModalLabel">
+//                 Modal title
+//               </h5> */}
+//               <button
+//                 type="button"
+//                 className="btn-close btn-outline-danger"
+//                 data-bs-dismiss="modal"
+//                 aria-label="Close"
+//                 style={{ opacity: 1 }}
+//               ></button>
+//             </div>
+//             <div className="modal-body">
+//               <h5>Popover in a modal</h5>
+//               <p>
+//                 This{" "}
+//                 <a
+//                   href="#"
+//                   role="button"
+//                   className="btn btn-secondary popover-test"
+//                   title="Popover title"
+//                   data-bs-content="Popover body content is set in this attribute."
+//                 >
+//                   button
+//                 </a>{" "}
+//                 triggers a popover on click.
+//               </p>
+//               <hr />
+//               <h5>Tooltips in a modal</h5>
+//               <p>
+//                 <a
+//                   href="#"
+//                   className="tooltip-test"
+//                   title="The countdown timer for this session"
+//                 >
+//                   This link
+//                 </a>{" "}
+//                 and{" "}
+//                 <a
+//                   href="#"
+//                   className="tooltip-test"
+//                   title="The room ID for the scene"
+//                 >
+//                   that link
+//                 </a>{" "}
+//                 have tooltips on hover.
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
 export default function Schedule() {
+  const [loading, setLoading] = useState(false);
+  const [thisUserID, setThisUserID] = useState(null);
+  const [schedule, setSchedule] = useState([]);
+
+  const getCurrentUserID = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // console.log("Schedule for: ", user);
+    // setThisUser(user);
+    let userid = user?.id;
+    return userid;
+  };
+  const getUserSchedule = async () => {
+    getCurrentUserID()
+      .then((u) => {
+        setThisUserID(u);
+      })
+      .catch((e) => console.error(e));
+    try {
+      setLoading(true);
+
+      const { data, error: scheduleFetchErr } = await supabase
+        .from("meetings")
+        .select("*")
+        .order("id", { ascending: false })
+        .contains("participant_ids", [thisUserID]);
+
+      if (scheduleFetchErr) {
+        alert(`Failed to fetch Schedule: ${scheduleFetchErr.message}`);
+        return;
+      }
+
+      setSchedule(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeItem = async (id) => {
+    try {
+      if (confirm("Are you sure you want to delete this?")) {
+        const response = await supabase.from("meetings").delete().eq("id", id);
+        if (response.status === 204) {
+          // alert("Removed item.");
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getUserSchedule();
+  }, []);
+
   return (
     <div>
       <ul className="list-group">
-        {Array.from({ length: 5 }, (_, index) => (
-          <li
-            key={index}
-            className="list-group-item d-flex justify-content-between align-items-center"
-          >
-            Item {index}
-            <div className="p-2">
-              <span className="badge bg-primary rounded-pill m-2">
-                {index * 2}
-              </span>
-              <button
-                type="button"
-                className="btn btn-success btn-sm m-1"
-                data-bs-toggle="modal"
-                data-bs-target="#iframeModal"
-              >
-                Join
-              </button>
-              <button type="button" className="btn btn-danger btn-sm m-1">
-                Cancel
-              </button>
-            </div>
-          </li>
-        ))}
+        {loading && (
+          <p className="card-text placeholder-glow">
+            <span className="placeholder col-12"></span>
+            <span className="placeholder col-12"></span>
+            <span className="placeholder col-12"></span>
+          </p>
+        )}
+        {schedule.length > 0 ? (
+          schedule.map((s, i) => (
+            <li
+              key={s.id}
+              className="list-group-item d-flex justify-content-between align-items-center"
+            >
+              {s.participant_usernames.join(" & ")} on {s.start_date} for{" "}
+              {s.time_limit} mins from {s.start_time}
+              <div className="p-2">
+                RoomID
+                <span className="badge bg-primary rounded-pill m-2">
+                  {s.room_id}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm m-1"
+                  data-bs-toggle="modal"
+                  data-bs-target="#iframeModal"
+                >
+                  Join
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm m-1"
+                  onClick={() => removeItem(s.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            </li>
+          ))
+        ) : (
+          <h2>No Schedule found.</h2>
+        )}
       </ul>
       {/**Fullscreen modal */}
       <div

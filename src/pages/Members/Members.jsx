@@ -12,13 +12,20 @@ import "./Members.css";
 
 export default function Members({ session }) {
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState({
+    userid: null,
+    username: null,
+    userage: null,
+    userimg: null,
+  });
+
   const [scene, setScene] = useState("");
   const [duration, setDuration] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
 
   const [members, setMembers] = useState([]);
-  const [date, setDate] = useState(new Date());
+  const [submitting, setSubmitting] = useState(false);
   // const highlitDates = [
   //   new Date(2025, 11, 14),
   //   new Date(2025, 11, 15),
@@ -26,6 +33,8 @@ export default function Members({ session }) {
   //   new Date(2025, 11, 19),
   //   new Date(2025, 11, 24),
   // ];
+
+  // dummy dates for fakeUsers
   const highlitDates = [
     "2025-12-14",
     "2025-12-15",
@@ -70,60 +79,114 @@ export default function Members({ session }) {
     });
   };
 
-  const handleSelectionChange = () => {
+  const handleSelectionChange = async () => {
     const roomID = createSecureRandomString(10);
-    const newBooking = {
-      roomId: roomID,
-      me: "currentUser",
-      guest: obj.name,
-      sceneType: scene,
-      timeLimit: duration,
-      //startDate: date,
-      startDate,
-      startTime,
-      endTime: addMinutes(startTime, +duration),
-      participant_ids: ["Jk09_pp33M__", obj.id],
-      participant_usernames: ["currentUser", obj.name],
-      status: "valid", // "valid"|"invalid"
-    };
-    console.log("Booked: ", newBooking);
+    // const newBooking = {
+    //   room_id: roomID,
+    //   // me: currentUser.username,
+    //   // guest: obj.name,
+    //   scene_type: scene,
+    //   time_limit: duration,
+    //   start_date: startDate,
+    //   start_time: startTime,
+    //   end_time: addMinutes(startTime, +duration),
+    //   participant_ids: [currentUser.userid, obj.id],
+    //   participant_usernames: [currentUser.username, obj.name],
+    //   requester: currentUser.username,
+    //   status: "valid", // "valid"|"invalid"
+    // };
+    try {
+      setSubmitting(true);
+      const { error } = await supabase.from("meetings").insert({
+        room_id: roomID,
+        scene_type: scene,
+        time_limit: duration,
+        start_date: startDate,
+        start_time: startTime,
+        end_time: addMinutes(startTime, +duration),
+        participant_ids: [currentUser.userid, obj.id],
+        participant_usernames: [currentUser.username, obj.name],
+        requester: currentUser.username,
+        status: "valid", // "valid"|"invalid"
+      });
+      if (!error) {
+        alert(
+          `You've requested a date with ${obj.name}. Check the Schedule page for details.`
+        );
+      } else {
+        alert("Request failed: ", error);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
+
+    //  console.log("Booked: ", newBooking);
     setScene("");
     setDuration("");
-    // setStartDate("");
+    setStartDate("");
     setStartTime("");
   };
 
   useEffect(() => {
-    // let ignore = false;
-    async function getProfile() {
+    async function getMembers() {
       setLoading(true);
-      const { user } = session;
 
       const { data, error } = await supabase.from("profiles").select();
-      console.log(data);
 
-      setMembers(fakeUsers.concat(data));
-      console.log(members);
+      if (error) throw error.message;
+      if (data) {
+        // console.log(data);
 
-      // if (!ignore) {
-      //   if (error) {
-      //     console.warn(error);
-      //   } else if (data) {
-      //     setUsername(data.username);
-      //     setAge(data.age);
-      //     // setWebsite(data.website);
-      //     setAvatarUrl(data.avatar_url);
-      //   }
-      // }
+        setMembers(fakeUsers.concat(data));
+        //  console.log(members);
+      }
+
+      setLoading(false);
+    }
+
+    try {
+      getMembers();
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    async function getProfile() {
+      const { user } = session;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`username, avatar_url, age`)
+        .eq("id", user.id)
+        .single();
+
+      if (!ignore) {
+        if (error) {
+          console.warn(error);
+        } else if (data) {
+          setCurrentUser({
+            userid: user.id,
+            username: data.username,
+            userage: data.age,
+            userimg: data.avatar_url,
+          });
+
+          // setAvatarUrl(data.avatar_url);
+        }
+      }
 
       setLoading(false);
     }
 
     getProfile();
 
-    // return () => {
-    //   ignore = true;
-    // };
+    return () => {
+      ignore = true;
+    };
   }, [session]);
 
   return (
@@ -133,56 +196,68 @@ export default function Members({ session }) {
 
         ))} */}
         {members ? (
-          members.map((m) => (
-            <div
-              className="user-card text-center"
-              style={{ background: "lightgray" }}
-              key={m.id}
-            >
-              <div className="avatar">
-                <img
-                  src={
-                    m.avatar_url ??
-                    "https://ionicframework.com/docs/img/demos/avatar.svg"
-                  }
-                  alt={m.username ? m.username : "member"}
-                  style={{ width: "100px", height: "100px" }}
-                />
-              </div>
-              <div className="card-body">
-                <h5 className="card-title fs-6">
-                  {m.username}{" "}
-                  <span style={{ fontSize: "10px", color: "gray" }}>
-                    ({m.gender})
-                  </span>
-                </h5>
-                <p className="card-text" style={{ fontSize: "12px" }}>
-                  {m.fun_fact
-                    ? m.fun_fact
-                    : `Some quick example text to build on the card title and make up
-                the bulk of the card's content.`}
-                </p>
-                <button
-                  type="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#reqModal"
-                  className="btn btn-outline-dark"
-                  onClick={() =>
-                    injectToModal(
-                      m.id,
-                      m.username,
-                      m.avatar_url,
-                      m.fun_fact,
-                      m.gender,
-                      m.status,
-                      m.age,
-                      m.available_days
-                    )
-                  }
+          members.map((m, i) => (
+            <div key={i}>
+              {loading ? (
+                <div
+                  className="user-card text-center"
+                  style={{ background: "lightgray" }}
+                  key={m.id}
                 >
-                  Request date
-                </button>
-              </div>
+                  <h2>Loading..</h2>
+                </div>
+              ) : (
+                <div
+                  className="user-card text-center"
+                  style={{ background: "lightgray" }}
+                  key={m.id}
+                >
+                  <div className="avatar">
+                    <img
+                      src={
+                        m.avatar_url ??
+                        "https://ionicframework.com/docs/img/demos/avatar.svg"
+                      }
+                      alt={m.username ? m.username : "member"}
+                      style={{ width: "100px", height: "100px" }}
+                    />
+                  </div>
+                  <div className="card-body">
+                    <h5 className="card-title fs-6">
+                      {m.username}{" "}
+                      <span style={{ fontSize: "10px", color: "gray" }}>
+                        ({m.gender})
+                      </span>
+                    </h5>
+                    <p className="card-text" style={{ fontSize: "12px" }}>
+                      {m.fun_fact
+                        ? m.fun_fact
+                        : `Some quick example text to build on the card title and make up
+                the bulk of the card's content.`}
+                    </p>
+                    <button
+                      type="button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#reqModal"
+                      className="btn btn-outline-dark"
+                      onClick={() =>
+                        injectToModal(
+                          m.id,
+                          m.username,
+                          m.avatar_url,
+                          m.fun_fact,
+                          m.gender,
+                          m.status,
+                          m.age,
+                          m.available_days
+                        )
+                      }
+                    >
+                      Request date
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -361,7 +436,7 @@ export default function Members({ session }) {
                 className="btn btn-outline-dark"
                 onClick={handleSelectionChange}
               >
-                Schedule
+                {submitting ? "Wait.." : "Schedule"}
               </button>
             </div>
           </div>

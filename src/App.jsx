@@ -8,6 +8,7 @@ import Account from "./pages/Account/Account";
 import Members from "./pages/Members/Members";
 import Schedule from "./pages/Schedule/Schedule";
 import Notifications from "./pages/Notifications/Notifications";
+import FAQs from "./pages/FAQs/FAQs";
 import NotFound from "./pages/NotFound/NotFound";
 
 import { supabase } from "./supabaseClient";
@@ -23,6 +24,7 @@ function MainComponent({ session }) {
         <Route path="/account" element={<Account session={session} />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/faqs" element={<FAQs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

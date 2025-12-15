@@ -113,7 +113,7 @@ export default function Navbar({ session }) {
                     className={({ isActive }) =>
                       isActive ? "dropdown-item active" : "nav-link"
                     }
-                    to="/"
+                    to="/faqs"
                   >
                     FAQs
                   </NavLink>
