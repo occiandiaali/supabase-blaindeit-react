@@ -104,8 +104,8 @@ export default function Auth() {
         <img
           src={appLogo}
           alt="blindate"
-          width="140"
-          height="44"
+          width="200"
+          height="54"
           className="d-inline-block align-text-top"
         />
         <h5>{isNewMember ? "Join us" : "Sign in"}</h5>

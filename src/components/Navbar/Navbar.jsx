@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, NavLink } from "react-router";
 import "./Navbar.css";
 //import logo from "/src/images/nobg-logo.png";
@@ -46,7 +47,14 @@ export default function Navbar({ session }) {
                 }
                 to="/schedule"
               >
-                Schedule
+                <span
+                  data-bs-toggle="collapse"
+                  data-bs-target="#navbarNavDropdown"
+                  aria-expanded="false"
+                  aria-controls="navbarNavDropdown"
+                >
+                  Schedule
+                </span>
               </NavLink>
             </li>
             <li className="nav-item">
@@ -56,7 +64,14 @@ export default function Navbar({ session }) {
                 }
                 to="/notifications"
               >
-                Notifications
+                <span
+                  data-bs-toggle="collapse"
+                  data-bs-target="#navbarNavDropdown"
+                  aria-expanded="false"
+                  aria-controls="navbarNavDropdown"
+                >
+                  Notifications
+                </span>
               </NavLink>
             </li>
             <li className="nav-item dropdown dropstart">
@@ -102,7 +117,14 @@ export default function Navbar({ session }) {
                     }
                     to="/account"
                   >
-                    Account
+                    <span
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navbarNavDropdown"
+                      aria-expanded="false"
+                      aria-controls="navbarNavDropdown"
+                    >
+                      Account
+                    </span>
                   </NavLink>
                 </li>
                 <li>
@@ -115,7 +137,14 @@ export default function Navbar({ session }) {
                     }
                     to="/faqs"
                   >
-                    FAQs
+                    <span
+                      data-bs-toggle="collapse"
+                      data-bs-target="#navbarNavDropdown"
+                      aria-expanded="false"
+                      aria-controls="navbarNavDropdown"
+                    >
+                      FAQs
+                    </span>
                   </NavLink>
                 </li>
                 <li>

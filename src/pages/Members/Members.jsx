@@ -26,6 +26,10 @@ export default function Members({ session }) {
 
   const [members, setMembers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const [age, setAge] = useState(18);
+  const [genderOption, setGenderOption] = useState("both");
+  const [filteredMembers, setFilteredMembers] = useState([]);
   // const highlitDates = [
   //   new Date(2025, 11, 14),
   //   new Date(2025, 11, 15),
@@ -129,6 +133,21 @@ export default function Members({ session }) {
     setStartTime("");
   };
 
+  const handleGenderSelect = (event) => {
+    setGenderOption(event.target.value);
+  };
+
+  const applyFilter = () => {
+    // console.log(`Filtered -> Age:${age} & ${genderOption}`);
+    const f = members.filter((m) => m.age >= age && m.gender === genderOption);
+    if (genderOption !== "both") {
+      setFilteredMembers(f);
+    } else {
+      setFilteredMembers(members);
+    }
+    // console.log(f);
+  };
+
   useEffect(() => {
     async function getMembers() {
       setLoading(true);
@@ -141,6 +160,7 @@ export default function Members({ session }) {
 
         setMembers(fakeUsers.concat(data));
         //  console.log(members);
+        setFilteredMembers(fakeUsers.concat(data));
       }
 
       setLoading(false);
@@ -191,12 +211,115 @@ export default function Members({ session }) {
 
   return (
     <div className="container">
+      <div
+        style={{
+          width: "34px",
+          height: "30px",
+          background: "orange",
+          alignContent: "center",
+
+          borderRadius: "3px",
+          position: "fixed",
+          top: "15%",
+          left: "3%",
+          cursor: "pointer",
+          zIndex: 30,
+        }}
+        className="dropdown"
+      >
+        <i
+          className="bi bi-filter"
+          id="filterDrop"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        ></i>
+        <ul className="dropdown-menu p-2 bg-gray" aria-labelledby="filterDrop">
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="sexRadio"
+              id="males"
+              value="Male"
+              checked={genderOption === "Male"}
+              onChange={handleGenderSelect}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="males"
+              style={{ fontSize: "14px" }}
+            >
+              Males only
+            </label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="sexRadio"
+              id="females"
+              value="Female"
+              checked={genderOption === "Female"}
+              onChange={handleGenderSelect}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="females"
+              style={{ fontSize: "14px" }}
+            >
+              Females only
+            </label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="sexRadio"
+              id="both"
+              value="both"
+              checked={genderOption === "both"}
+              onChange={handleGenderSelect}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="both"
+              style={{ fontSize: "14px" }}
+            >
+              Both
+            </label>
+          </div>
+          <hr />
+          <div>
+            <label
+              htmlFor="ageRange"
+              className="form-label p-1"
+              style={{ fontSize: "14px" }}
+            >
+              See only {age} & above
+            </label>
+            <input
+              type="range"
+              value={age}
+              disabled={genderOption === "both"}
+              className="form-range"
+              min="18"
+              max="100"
+              id="ageRange"
+              onChange={(e) => setAge(e.target.value)}
+            ></input>
+          </div>
+          <hr />
+          <button className="btn btn-outline-dark btn-sm" onClick={applyFilter}>
+            Apply
+          </button>
+        </ul>
+      </div>
       <div className="grid">
         {/* {Array.from({ length: 20 }, (_, index) => (
 
         ))} */}
-        {members ? (
-          members.map((m, i) => (
+        {filteredMembers.length > 0 ? (
+          filteredMembers.map((m, i) => (
             <div key={i}>
               {loading ? (
                 <div
@@ -253,7 +376,7 @@ export default function Members({ session }) {
                         )
                       }
                     >
-                      Request date
+                      See more
                     </button>
                   </div>
                 </div>
@@ -261,7 +384,7 @@ export default function Members({ session }) {
             </div>
           ))
         ) : (
-          <h5>No Members Found</h5>
+          <h5 style={{ margin: "0 auto" }}>No Members Found</h5>
         )}
       </div>
       {/* <!-- Vertically centered scrollable modal --> */}
@@ -323,7 +446,7 @@ export default function Members({ session }) {
                 <option value="">Choose a scene</option>
 
                 <option value="haunted_interior">Haunted Interior</option>
-                <option value="cordelia_park">Cordelia Park</option>
+                <option value="white_court">Cordelia Park</option>
                 <option value="Scene Three">Scene Three</option>
               </select>
 

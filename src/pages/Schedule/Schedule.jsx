@@ -3,102 +3,10 @@ import { supabase } from "../../supabaseClient";
 
 import "./Schedule.css";
 
-// export default function Schedule() {
-//   return (
-//     <div>
-//       <ul className="list-group">
-//         {Array.from({ length: 5 }, (_, index) => (
-//           <li
-//             key={index}
-//             className="list-group-item d-flex justify-content-between align-items-center"
-//           >
-//             Item {index}
-//             <div className="p-2">
-//               <span className="badge bg-primary rounded-pill m-2">
-//                 {index * 2}
-//               </span>
-//               <button
-//                 type="button"
-//                 className="btn btn-success btn-sm m-1"
-//                 data-bs-toggle="modal"
-//                 data-bs-target="#iframeModal"
-//               >
-//                 Join
-//               </button>
-//               <button type="button" className="btn btn-danger btn-sm m-1">
-//                 Cancel
-//               </button>
-//             </div>
-//           </li>
-//         ))}
-//       </ul>
-//       {/**Fullscreen modal */}
-//       <div
-//         className="modal fade"
-//         id="iframeModal"
-//         tabIndex="-1"
-//         aria-hidden="true"
-//       >
-//         <div className="modal-dialog modal-fullscreen">
-//           <div className="modal-content">
-//             <div className="modal-header" style={{ opacity: 0.5 }}>
-//               {/* <h5 className="modal-title" id="exampleModalLabel">
-//                 Modal title
-//               </h5> */}
-//               <button
-//                 type="button"
-//                 className="btn-close btn-outline-danger"
-//                 data-bs-dismiss="modal"
-//                 aria-label="Close"
-//                 style={{ opacity: 1 }}
-//               ></button>
-//             </div>
-//             <div className="modal-body">
-//               <h5>Popover in a modal</h5>
-//               <p>
-//                 This{" "}
-//                 <a
-//                   href="#"
-//                   role="button"
-//                   className="btn btn-secondary popover-test"
-//                   title="Popover title"
-//                   data-bs-content="Popover body content is set in this attribute."
-//                 >
-//                   button
-//                 </a>{" "}
-//                 triggers a popover on click.
-//               </p>
-//               <hr />
-//               <h5>Tooltips in a modal</h5>
-//               <p>
-//                 <a
-//                   href="#"
-//                   className="tooltip-test"
-//                   title="The countdown timer for this session"
-//                 >
-//                   This link
-//                 </a>{" "}
-//                 and{" "}
-//                 <a
-//                   href="#"
-//                   className="tooltip-test"
-//                   title="The room ID for the scene"
-//                 >
-//                   that link
-//                 </a>{" "}
-//                 have tooltips on hover.
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 export default function Schedule() {
   const [loading, setLoading] = useState(false);
   const [thisUserID, setThisUserID] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [schedule, setSchedule] = useState([]);
 
   const [scene, setScene] = useState(null);
@@ -118,16 +26,17 @@ export default function Schedule() {
       data: { user },
     } = await supabase.auth.getUser();
     // console.log("Schedule for: ", user);
-    // setThisUser(user);
     let userid = user?.id;
     return userid;
   };
+
   const getUserSchedule = async () => {
     getCurrentUserID()
       .then((u) => {
         setThisUserID(u);
       })
       .catch((e) => console.error(e));
+
     try {
       setLoading(true);
 
@@ -158,7 +67,7 @@ export default function Schedule() {
           .delete()
           .eq("id", id)
           .then(() => {
-            alert("Removed item forever.");
+            alert("Successfully deleted.");
             window.location.reload();
           })
           .catch((e) => console.error(e));
@@ -171,6 +80,8 @@ export default function Schedule() {
   useEffect(() => {
     getUserSchedule();
   }, []);
+
+  const currentDate = new Date(); // test strikethrough
 
   return (
     <div>
@@ -187,6 +98,12 @@ export default function Schedule() {
             <li
               key={s.id}
               className="list-group-item d-flex justify-content-between align-items-center"
+              style={{
+                textDecoration:
+                  s.start_date < currentDate.toISOString().slice(0, 10)
+                    ? "line-through"
+                    : "none",
+              }}
             >
               {s.participant_usernames.join(" & ")} on {s.start_date} for{" "}
               {s.time_limit} mins from {s.start_time}
@@ -208,6 +125,9 @@ export default function Schedule() {
                       s.participant_usernames
                     )
                   }
+                  disabled={
+                    s.start_date < currentDate.toISOString().slice(0, 10)
+                  }
                 >
                   Join
                 </button>
@@ -222,7 +142,7 @@ export default function Schedule() {
             </li>
           ))
         ) : (
-          <h2>No Schedule found.</h2>
+          <h2 className="fs-6">No Schedule found.</h2>
         )}
       </ul>
       {/**Fullscreen modal */}
@@ -251,8 +171,14 @@ export default function Schedule() {
               <div className="meeting-live-area">
                 <iframe
                   src={
-                    scene === "cordelia_park"
-                      ? "https://playcanv.as/p/kkYFilt6/"
+                    scene === "white_court"
+                      ? `https://playcanv.as/p/ITn9wsmF/?room_id=${encodeURIComponent(
+                          roomid
+                        )}&duration=${encodeURIComponent(
+                          limit
+                        )}&participant_usernames=${encodeURIComponent(
+                          usernames
+                        )}`
                       : scene === "haunted_interior"
                       ? `https://playcanv.as/p/1KTW8pdN/?room_id=${encodeURIComponent(
                           roomid
