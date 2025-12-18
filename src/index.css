@@ -26,6 +26,7 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
+  background-color: rgb(241, 236, 248);
   /* display: flex;
   place-items: center;
   min-width: 320px;

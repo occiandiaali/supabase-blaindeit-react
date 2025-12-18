@@ -9,6 +9,8 @@ import createSecureRandomString from "../../helpers/createSecureRandomString";
 import { supabase } from "../../supabaseClient";
 
 import "./Members.css";
+import alien from "../../assets/audio/alien-voice.mp3";
+import french from "../../assets/audio/french-female-voice.mp3";
 
 export default function Members({ session }) {
   const [loading, setLoading] = useState(true);
@@ -138,6 +140,7 @@ export default function Members({ session }) {
   };
 
   const applyFilter = () => {
+    // filters members list
     // console.log(`Filtered -> Age:${age} & ${genderOption}`);
     const f = members.filter((m) => m.age >= age && m.gender === genderOption);
     if (genderOption !== "both") {
@@ -146,6 +149,11 @@ export default function Members({ session }) {
       setFilteredMembers(members);
     }
     // console.log(f);
+  };
+
+  const playAudio = (g) => {
+    const audio = g === "Male" ? new Audio(alien) : new Audio(french);
+    audio.play();
   };
 
   useEffect(() => {
@@ -221,7 +229,7 @@ export default function Members({ session }) {
           borderRadius: "3px",
           position: "fixed",
           top: "15%",
-          left: "3%",
+          left: "5%",
           cursor: "pointer",
           zIndex: 30,
         }}
@@ -285,7 +293,7 @@ export default function Members({ session }) {
               htmlFor="both"
               style={{ fontSize: "14px" }}
             >
-              Both
+              All
             </label>
           </div>
           <hr />
@@ -330,11 +338,7 @@ export default function Members({ session }) {
                   <h2>Loading..</h2>
                 </div>
               ) : (
-                <div
-                  className="user-card text-center"
-                  style={{ background: "lightgray" }}
-                  key={m.id}
-                >
+                <div className="user-card text-center" key={m.id}>
                   <div className="avatar">
                     <img
                       src={
@@ -342,7 +346,6 @@ export default function Members({ session }) {
                         "https://ionicframework.com/docs/img/demos/avatar.svg"
                       }
                       alt={m.username ? m.username : "member"}
-                      style={{ width: "100px", height: "100px" }}
                     />
                   </div>
                   <div className="card-body">
@@ -350,6 +353,12 @@ export default function Members({ session }) {
                       {m.username}{" "}
                       <span style={{ fontSize: "10px", color: "gray" }}>
                         ({m.gender})
+                      </span>{" "}
+                      <span style={{ cursor: "pointer" }}>
+                        <i
+                          className="bi bi-volume-up-fill"
+                          onClick={() => playAudio(m.gender)}
+                        ></i>
                       </span>
                     </h5>
                     <p className="card-text" style={{ fontSize: "12px" }}>
@@ -362,7 +371,7 @@ export default function Members({ session }) {
                       type="button"
                       data-bs-toggle="modal"
                       data-bs-target="#reqModal"
-                      className="btn btn-outline-dark"
+                      className="btn btn-outline-dark btn-sm"
                       onClick={() =>
                         injectToModal(
                           m.id,
@@ -384,7 +393,12 @@ export default function Members({ session }) {
             </div>
           ))
         ) : (
-          <h5 style={{ margin: "0 auto" }}>No Members Found</h5>
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ height: "40vh", paddingLeft: "60%" }}
+          >
+            <h5>No Members Found</h5>
+          </div>
         )}
       </div>
       {/* <!-- Vertically centered scrollable modal --> */}

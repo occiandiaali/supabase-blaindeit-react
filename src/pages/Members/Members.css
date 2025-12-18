@@ -5,19 +5,21 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  /* gap: 1rem; */
+  gap: 0.4rem;
 }
 
 .user-card {
-  background: #1b1b1b;
+  /* background: #1b1b1b; */
+  background: linear-gradient(to bottom, rgb(38, 16, 53) 10%, transparent 50%);
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
   /* border: 1px solid #333; */
 }
 
-.user-card .avatar img {
-  width: 64px;
-  height: 64px;
+.avatar img {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
 }
