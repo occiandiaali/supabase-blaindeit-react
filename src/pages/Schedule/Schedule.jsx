@@ -187,6 +187,8 @@ export default function Schedule() {
                         )}&participant_usernames=${encodeURIComponent(
                           usernames
                         )}`
+                      : scene === "flat_land1"
+                      ? `https://bf342761-237e-4b7e-8898-1853fd304904-00-2j34a7t27gjdm.spock.replit.dev/`
                       : null
                   }
                   className="meeting-iframe"

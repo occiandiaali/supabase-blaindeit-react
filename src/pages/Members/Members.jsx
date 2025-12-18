@@ -461,7 +461,7 @@ export default function Members({ session }) {
 
                 <option value="haunted_interior">Haunted Interior</option>
                 <option value="white_court">Cordelia Park</option>
-                <option value="Scene Three">Scene Three</option>
+                <option value="flat_land1">Flat Land One</option>
               </select>
 
               <br />
