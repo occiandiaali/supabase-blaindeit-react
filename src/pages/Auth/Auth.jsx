@@ -34,7 +34,7 @@ export default function Auth() {
       });
       if (error) throw error;
       //  alert("Welcome, ", data.user);
-      console.log("Success ", data.user.user_metadata);
+      // console.log("Success ", data.user.user_metadata);
     } catch (error) {
       console.error(error);
     }

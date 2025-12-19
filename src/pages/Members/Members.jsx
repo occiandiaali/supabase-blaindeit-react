@@ -395,7 +395,7 @@ export default function Members({ session }) {
         ) : (
           <div
             className="d-flex justify-content-center align-items-center"
-            style={{ height: "40vh", paddingLeft: "60%" }}
+            style={{ height: "20vh", marginLeft: "20%" }}
           >
             <h5>No Members Found</h5>
           </div>

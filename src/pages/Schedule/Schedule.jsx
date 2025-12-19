@@ -3,6 +3,10 @@ import { supabase } from "../../supabaseClient";
 
 import "./Schedule.css";
 
+// ? `https://bf342761-237e-4b7e-8898-1853fd304904-00-2j34a7t27gjdm.spock.replit.dev/?countdown=${encodeURIComponent(
+//     limit
+//   )}&room_id=${encodeURIComponent(roomid)}`
+
 export default function Schedule() {
   const [loading, setLoading] = useState(false);
   const [thisUserID, setThisUserID] = useState(null);
@@ -188,7 +192,9 @@ export default function Schedule() {
                           usernames
                         )}`
                       : scene === "flat_land1"
-                      ? `https://bf342761-237e-4b7e-8898-1853fd304904-00-2j34a7t27gjdm.spock.replit.dev/`
+                      ? `https://replit-r-3-f--pee.replit.app/?countdown=${encodeURIComponent(
+                          limit
+                        )}&room_id=${encodeURIComponent(roomid)}`
                       : null
                   }
                   className="meeting-iframe"
