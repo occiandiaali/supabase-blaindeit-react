@@ -226,6 +226,14 @@ export default function Schedule() {
                         )}&participant_usernames=${encodeURIComponent(
                           usernames
                         )}`
+                      : scene === "pools_gardens"
+                      ? `https://playcanv.as/p/xO1wZq5b/?room_id=${encodeURIComponent(
+                          roomid
+                        )}&duration=${encodeURIComponent(
+                          limit
+                        )}&participant_usernames=${encodeURIComponent(
+                          usernames
+                        )}`
                       : null
                   }
                   className="meeting-iframe"
