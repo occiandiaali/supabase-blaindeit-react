@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
+import pingRender from "../../helpers/pingRender";
+
 import "./Schedule.css";
 
 // ? `https://bf342761-237e-4b7e-8898-1853fd304904-00-2j34a7t27gjdm.spock.replit.dev/?countdown=${encodeURIComponent(
@@ -18,11 +20,32 @@ export default function Schedule() {
   const [limit, setLimit] = useState(null);
   const [usernames, setUsernames] = useState(null);
 
+  const [bsToggle, setBSToggle] = useState(null);
+
   const injectToFrame = (s, r, l, u) => {
     setScene(s);
     setRoomid(r);
     setLimit(l);
     setUsernames(u);
+  };
+
+  const joinRoomAction = (s, r, l, u) => {
+    let goodToGo = pingRender();
+    if (goodToGo === "up") {
+      setScene(s);
+      setRoomid(r);
+      setLimit(l);
+      setUsernames(u);
+      setBSToggle(true);
+    } else if (goodToGo === "down") {
+      alert("The room server is sleeping. Try again in about a minute..");
+      setBSToggle(false);
+      return;
+    } else {
+      alert(goodToGo);
+      setBSToggle(false);
+      return;
+    }
   };
 
   const getCurrentUserID = async () => {
@@ -195,6 +218,14 @@ export default function Schedule() {
                       ? `https://replit-r-3-f--pee.replit.app/?countdown=${encodeURIComponent(
                           limit
                         )}&room_id=${encodeURIComponent(roomid)}`
+                      : scene === "building_site"
+                      ? `https://playcanv.as/p/Zzk7eFPt/?room_id=${encodeURIComponent(
+                          roomid
+                        )}&duration=${encodeURIComponent(
+                          limit
+                        )}&participant_usernames=${encodeURIComponent(
+                          usernames
+                        )}`
                       : null
                   }
                   className="meeting-iframe"
