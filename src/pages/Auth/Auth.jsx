@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../../supabaseClient";
-import BgVideo from "/src/videos/video-bg.mp4";
+//import BgVideo from "/src/videos/video-bg.mp4";
+import BgVideo from "/src/videos/roses.mp4";
 import appLogo from "/src/images/blindate-logo-nobg.png";
 import "./Auth.css";
 
@@ -108,7 +109,9 @@ export default function Auth() {
           height="54"
           className="d-inline-block align-text-top"
         />
-        <h5>{isNewMember ? "Join us" : "Sign in"}</h5>
+        {!isNewMember && <h3>Welcome back!</h3>}
+
+        <h3>{isNewMember ? "Join us" : ""}</h3>
 
         <form
           className="form-widget"
@@ -265,7 +268,10 @@ export default function Auth() {
               {loading ? (
                 <span>Working..</span>
               ) : (
-                <span className="text-light">
+                // <span className="text-dark">
+                //   {isNewMember ? "Register" : "Sign in"}
+                // </span>
+                <span className="login-reg-span">
                   {isNewMember ? "Register" : "Sign in"}
                 </span>
               )}
