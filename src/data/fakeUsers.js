@@ -58,7 +58,7 @@ const fakeUsers = [
   },
   {
     id: "41e9a65a-2f3c-417c-a551-f9b16001ce66",
-    username: "Adanna",
+    username: "Alexis",
     gender: "Female",
     age: 26,
     avatar_url: "https://publicdomainvectors.org/tn_img/googley-eye-birds.webp", //"https://i.pravatar.cc/100?img=7",
@@ -177,7 +177,7 @@ const fakeUsers = [
   },
   {
     id: "07f55f80-3bb5-4de7-83b9-b1b2723c390b",
-    username: "Adanna",
+    username: "Alexis",
     gender: "Female",
     age: 18,
     avatar_url: "https://i.pravatar.cc/100?img=7",
@@ -278,7 +278,7 @@ const fakeUsers = [
   },
   // {
   //   id: 33,
-  //   username: "Adanna",
+  //   username: "Alexis",
   //   avatar_url: "https://i.pravatar.cc/100?img=7",
   //   status: "offline",
   // },
