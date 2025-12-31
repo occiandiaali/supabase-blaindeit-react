@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import fakeUsers from "../../data/fakeUsers";
-// import Calendar from "react-calendar";
-// import "react-calendar/dist/Calendar.css";
+import { useEffect, useRef, useState } from "react";
+//import fakeUsers from "../../data/fakeUsers";
+
 import CustomCalendar from "../../components/CustomCalendar";
 import addMinutes from "../../helpers/addMinutes";
 import createSecureRandomString from "../../helpers/createSecureRandomString";
@@ -14,6 +13,12 @@ import french from "../../assets/audio/french-female-voice.mp3";
 
 export default function Members({ session }) {
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const PAGE_SIZE = 5; //10;
+  const loaderRef = useRef(null);
+
   const [currentUser, setCurrentUser] = useState({
     userid: null,
     username: null,
@@ -31,7 +36,7 @@ export default function Members({ session }) {
 
   const [age, setAge] = useState(18);
   const [genderOption, setGenderOption] = useState("both");
-  const [filteredMembers, setFilteredMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState(members);
   // const highlitDates = [
   //   new Date(2025, 11, 14),
   //   new Date(2025, 11, 15),
@@ -65,14 +70,6 @@ export default function Members({ session }) {
   });
 
   const injectToModal = (id, n, i, f, g, s, a, av) => {
-    // setObj((prevObj) => ({
-    //   ...prevObj,
-    //   name: n,
-    //   image: i,
-    //   fact: f,
-    //   gender: g,
-    //   status: s,
-    // }));
     setObj({
       id: id,
       name: n,
@@ -87,20 +84,7 @@ export default function Members({ session }) {
 
   const handleSelectionChange = async () => {
     const roomID = createSecureRandomString(10);
-    // const newBooking = {
-    //   room_id: roomID,
-    //   // me: currentUser.username,
-    //   // guest: obj.name,
-    //   scene_type: scene,
-    //   time_limit: duration,
-    //   start_date: startDate,
-    //   start_time: startTime,
-    //   end_time: addMinutes(startTime, +duration),
-    //   participant_ids: [currentUser.userid, obj.id],
-    //   participant_usernames: [currentUser.username, obj.name],
-    //   requester: currentUser.username,
-    //   status: "valid", // "valid"|"invalid"
-    // };
+
     try {
       setSubmitting(true);
       const { error } = await supabase.from("meetings").insert({
@@ -127,8 +111,6 @@ export default function Members({ session }) {
     } finally {
       setSubmitting(false);
     }
-
-    //  console.log("Booked: ", newBooking);
     setScene("");
     setDuration("");
     setStartDate("");
@@ -141,14 +123,12 @@ export default function Members({ session }) {
 
   const applyFilter = () => {
     // filters members list
-    // console.log(`Filtered -> Age:${age} & ${genderOption}`);
     const f = members.filter((m) => m.age >= age && m.gender === genderOption);
     if (genderOption !== "both") {
       setFilteredMembers(f);
     } else {
       setFilteredMembers(members);
     }
-    // console.log(f);
   };
 
   const playAudio = (g) => {
@@ -156,29 +136,33 @@ export default function Members({ session }) {
     audio.play();
   };
 
-  useEffect(() => {
-    async function getMembers() {
-      setLoading(true);
+  const loadMore = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .range(from, to);
 
-      const { data, error } = await supabase.from("profiles").select();
-
-      if (error) throw error.message;
-      if (data) {
-        // console.log(data);
-
-        setMembers(fakeUsers.concat(data));
-        //  console.log(members);
-        setFilteredMembers(fakeUsers.concat(data));
-      }
-
-      setLoading(false);
-    }
-
-    try {
-      getMembers();
-    } catch (error) {
+    if (error) {
       console.error(error);
+      return;
     }
+
+    setMembers((prev) => [...prev, ...data]);
+    setFilteredMembers((prev) => [...prev, ...data]);
+    setPage((prev) => prev + 1);
+    if (data.length < PAGE_SIZE) {
+      setHasMore(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    //getMembers();
+    loadMore();
   }, []);
 
   useEffect(() => {
@@ -216,6 +200,26 @@ export default function Members({ session }) {
       ignore = true;
     };
   }, [session]);
+
+  // // Intersection Observer setup
+  // useEffect(() => {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0].isIntersecting) {
+  //         loadMore();
+  //       }
+  //     },
+  //     { threshold: 1 }
+  //   );
+  //   if (loaderRef.current) {
+  //     observer.observe(loaderRef.current);
+  //   }
+  //   return () => {
+  //     if (loaderRef.current) {
+  //       observer.unobserve(loaderRef.current);
+  //     }
+  //   };
+  // }, [loaderRef.current]);
 
   return (
     <div className="container">
@@ -329,78 +333,110 @@ export default function Members({ session }) {
         {filteredMembers.length > 0 ? (
           filteredMembers.map((m, i) => (
             <div key={i}>
-              {loading ? (
-                <div
-                  className="user-card text-center"
-                  style={{ background: "lightgray" }}
-                  key={m.id}
-                >
-                  <h2>Loading..</h2>
+              <div className="user-card text-center" key={m.id}>
+                <div className="avatar">
+                  <img
+                    src={
+                      m.avatar_url ??
+                      "https://ionicframework.com/docs/img/demos/avatar.svg"
+                    }
+                    alt={m.username ? m.username : "member"}
+                  />
                 </div>
-              ) : (
-                <div className="user-card text-center" key={m.id}>
-                  <div className="avatar">
-                    <img
-                      src={
-                        m.avatar_url ??
-                        "https://ionicframework.com/docs/img/demos/avatar.svg"
-                      }
-                      alt={m.username ? m.username : "member"}
-                    />
-                  </div>
-                  <div className="card-body">
-                    <h5 className="card-title fs-6">
-                      {m.username}{" "}
-                      <span style={{ fontSize: "10px", color: "gray" }}>
-                        ({m.gender})
-                      </span>{" "}
-                      <span style={{ cursor: "pointer" }}>
-                        <i
-                          className="bi bi-volume-up-fill"
-                          onClick={() => playAudio(m.gender)}
-                        ></i>
-                      </span>
-                    </h5>
-                    <p className="card-text" style={{ fontSize: "12px" }}>
-                      {m.fun_fact
-                        ? m.fun_fact
-                        : `Some quick example text to build on the card title and make up
+                <div className="card-body">
+                  <h5 className="card-title fs-6">
+                    {m.username}{" "}
+                    <span style={{ fontSize: "10px", color: "gray" }}>
+                      ({m.gender})
+                    </span>{" "}
+                    <span style={{ cursor: "pointer" }}>
+                      <i
+                        className="bi bi-volume-up-fill"
+                        onClick={() => playAudio(m.gender)}
+                      ></i>
+                    </span>
+                  </h5>
+                  <p className="card-text" style={{ fontSize: "12px" }}>
+                    {m.fun_fact
+                      ? m.fun_fact
+                      : `Some quick example text to build on the card title and make up
                 the bulk of the card's content.`}
-                    </p>
-                    <button
-                      type="button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#reqModal"
-                      className="btn btn-outline-dark btn-sm"
-                      onClick={() =>
-                        injectToModal(
-                          m.id,
-                          m.username,
-                          m.avatar_url,
-                          m.fun_fact,
-                          m.gender,
-                          m.status,
-                          m.age,
-                          m.available_days
-                        )
-                      }
-                    >
-                      See more
-                    </button>
-                  </div>
+                  </p>
+                  <button
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#reqModal"
+                    className="btn btn-outline-dark btn-sm"
+                    onClick={() =>
+                      injectToModal(
+                        m.id,
+                        m.username,
+                        m.avatar_url,
+                        m.fun_fact,
+                        m.gender,
+                        m.status,
+                        m.age,
+                        m.available_days
+                      )
+                    }
+                  >
+                    Schedule date
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           ))
         ) : (
-          <div
-            className="d-flex justify-content-center align-items-center"
-            style={{ height: "20vh", marginLeft: "20%" }}
-          >
-            <h5>No Members Found</h5>
+          <div>
+            <div className="user-card text-center">
+              <div className="avatar">
+                <img
+                  src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                  alt="member"
+                />
+              </div>
+              <div className="card-body">
+                <h5 className="card-title fs-6">
+                  Username{" "}
+                  <span style={{ fontSize: "10px", color: "gray" }}>
+                    (Gender)
+                  </span>{" "}
+                  <span style={{ cursor: "pointer" }}>
+                    <i className="bi bi-volume-up-fill" disabled></i>
+                  </span>
+                </h5>
+                <p className="card-text" style={{ fontSize: "12px" }}>
+                  If you see this it means that your connection is good enough
+                  to see the page's content. Load more to continue..
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-outline-dark btn-sm"
+                  disabled
+                >
+                  Schedule date
+                </button>
+              </div>
+            </div>
           </div>
         )}
+
+        {/*{hasMore && (
+          <div ref={loaderRef} style={{ height: "50px" }}>
+            {loading && <p>Loading...</p>}
+          </div>
+        )}*/}
       </div>
+      {hasMore && (
+        <button
+          className="btn btn-outline-dark fixed-bottom"
+          onClick={loadMore}
+          disabled={loading}
+          style={{ maxWidth: "120px", margin: "0 auto" }}
+        >
+          {loading ? "Loading.." : "Load more"}
+        </button>
+      )}
       {/* <!-- Vertically centered scrollable modal --> */}
       <div
         className="modal fade"
@@ -537,19 +573,6 @@ export default function Members({ session }) {
                   Click purple highlight to select/deselect
                 </span>
                 <div style={{ marginLeft: "5%" }}>
-                  {/* <Calendar
-                    onChange={setDate}
-                    value={date}
-                    tileClassName={({ date, view }) => {
-                      if (
-                        highlitDates.find(
-                          (d) => d.toDateString() === date.toDateString()
-                        )
-                      ) {
-                        return "highlight";
-                      }
-                    }}
-                  /> */}
                   <CustomCalendar
                     dates={obj.available || highlitDates}
                     onDataChange={handleSetStartDate}
@@ -558,11 +581,7 @@ export default function Members({ session }) {
                 <br />
                 <label>Select a time</label>
                 <br />
-                {/* <input
-                  type={"datetime-local"}
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                /> */}
+
                 <input
                   type={"time"}
                   value={startTime}
