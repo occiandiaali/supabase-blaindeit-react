@@ -219,7 +219,7 @@ export default function Schedule() {
                           limit
                         )}&room_id=${encodeURIComponent(roomid)}`
                       : scene === "building_site"
-                      ? `https://playcanv.as/p/Zzk7eFPt/?room_id=${encodeURIComponent(
+                      ? `https://playcanv.as/p/FJz9nmXR/?room_id=${encodeURIComponent(
                           roomid
                         )}&duration=${encodeURIComponent(
                           limit
