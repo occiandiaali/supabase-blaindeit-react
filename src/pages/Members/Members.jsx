@@ -162,7 +162,7 @@ export default function Members({ session }) {
     //  loadMore();
     const storedList = localStorage.getItem("members");
     if (storedList !== null) {
-      console.log(storedList);
+      // console.log(storedList);
       setFilteredMembers(JSON.parse(storedList));
     }
   }, []);
