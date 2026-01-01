@@ -154,7 +154,10 @@ export default function Navbar({ session }) {
                   <span
                     className="dropdown-item text-muted"
                     role="button"
-                    onClick={() => supabase.auth.signOut()}
+                    onClick={() => {
+                      supabase.auth.signOut();
+                      localStorage.removeItem("members");
+                    }}
                   >
                     SignOut
                   </span>

@@ -55,7 +55,7 @@ const CustomCalendar = ({ dates, onDataChange }) => {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(7, 1fr)",
-          gap: "4px",
+          gap: "2px",
         }}
       >
         {calendarDays.map((day, idx) => {
@@ -73,7 +73,7 @@ const CustomCalendar = ({ dates, onDataChange }) => {
 
           return (
             <div
-              key={day}
+              key={idx}
               onClick={() => toggleSelection(dateStr)}
               style={{
                 padding: "10px",

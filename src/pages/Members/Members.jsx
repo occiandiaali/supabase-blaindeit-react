@@ -15,6 +15,7 @@ export default function Members({ session }) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [local, setLocal] = useState([]);
 
   const PAGE_SIZE = 5; //10;
   const loaderRef = useRef(null);
@@ -37,22 +38,15 @@ export default function Members({ session }) {
   const [age, setAge] = useState(18);
   const [genderOption, setGenderOption] = useState("both");
   const [filteredMembers, setFilteredMembers] = useState(members);
-  // const highlitDates = [
-  //   new Date(2025, 11, 14),
-  //   new Date(2025, 11, 15),
-  //   new Date(2025, 11, 16),
-  //   new Date(2025, 11, 19),
-  //   new Date(2025, 11, 24),
-  // ];
 
-  // dummy dates for fakeUsers
-  const highlitDates = [
-    "2025-12-14",
-    "2025-12-15",
-    "2025-12-16",
-    "2025-12-19",
-    "2025-12-24",
-  ];
+  // // dummy dates for fakeUsers
+  // const highlitDates = [
+  //   "2025-12-14",
+  //   "2025-12-15",
+  //   "2025-12-16",
+  //   "2025-12-19",
+  //   "2025-12-24",
+  // ];
 
   const handleSetStartDate = (newData) => {
     setStartDate(newData);
@@ -153,16 +147,24 @@ export default function Members({ session }) {
 
     setMembers((prev) => [...prev, ...data]);
     setFilteredMembers((prev) => [...prev, ...data]);
+
     setPage((prev) => prev + 1);
     if (data.length < PAGE_SIZE) {
       setHasMore(false);
     }
     setLoading(false);
+
+    localStorage.setItem("members", JSON.stringify([...members, ...data]));
   };
 
   useEffect(() => {
     //getMembers();
-    loadMore();
+    //  loadMore();
+    const storedList = localStorage.getItem("members");
+    if (storedList !== null) {
+      console.log(storedList);
+      setFilteredMembers(JSON.parse(storedList));
+    }
   }, []);
 
   useEffect(() => {
@@ -406,8 +408,9 @@ export default function Members({ session }) {
                   </span>
                 </h5>
                 <p className="card-text" style={{ fontSize: "12px" }}>
-                  If you see this it means that your connection is good enough
-                  to see the page's content. Load more to continue..
+                  Members remain anonymous to each other, unless they decide
+                  otherwise. Only usernames, voices, and avatars are showed on
+                  the Members' lobby.
                 </p>
                 <button
                   type="button"
@@ -449,7 +452,10 @@ export default function Members({ session }) {
           <div className="modal-content">
             <div className="modal-header">
               <h6 className="modal-title" id="reqModalLabel">
-                Schedule a date with {obj.name} ({obj.gender})
+                Schedule a date with {obj.name}{" "}
+                <span className="text-muted" style={{ fontSize: "12px" }}>
+                  ({obj.gender})
+                </span>
               </h6>
               <button
                 type="button"
@@ -572,7 +578,7 @@ export default function Members({ session }) {
                 >
                   Click purple highlight to select/deselect
                 </span>
-                <div style={{ marginLeft: "5%" }}>
+                <div>
                   <CustomCalendar
                     dates={obj.available || highlitDates}
                     onDataChange={handleSetStartDate}
