@@ -580,7 +580,7 @@ export default function Members({ session }) {
                 </span>
                 <div>
                   <CustomCalendar
-                    dates={obj.available || highlitDates}
+                    dates={obj.available}
                     onDataChange={handleSetStartDate}
                   />
                 </div>
