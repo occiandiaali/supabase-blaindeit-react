@@ -32,12 +32,17 @@ export default function Members({ session }) {
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
 
-  const [members, setMembers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   const [age, setAge] = useState(18);
   const [genderOption, setGenderOption] = useState("both");
-  const [filteredMembers, setFilteredMembers] = useState(members);
+  const [filteredMembers, setFilteredMembers] = useState([]);
+  const [members, setMembers] = useState(filteredMembers);
+
+  const [count, setCount] = useState(0); // Items picked from storage
+  const [chunk, setChunk] = useState(5); // Items picked from storage
+
+  const [temp, setTemp] = useState([]);
 
   // // dummy dates for fakeUsers
   // const highlitDates = [
@@ -154,17 +159,17 @@ export default function Members({ session }) {
     }
     setLoading(false);
 
-    localStorage.setItem("members", JSON.stringify([...members, ...data]));
+    //  localStorage.setItem("members", JSON.stringify([...members, ...data]));
   };
 
   useEffect(() => {
     //getMembers();
-    //  loadMore();
-    const storedList = localStorage.getItem("members");
-    if (storedList !== null) {
-      // console.log(storedList);
-      setFilteredMembers(JSON.parse(storedList));
-    }
+    loadMore();
+    // const storedList = localStorage.getItem("members");
+    // if (storedList !== null) {
+    //   // console.log(storedList);
+    //   setFilteredMembers(JSON.parse(storedList));
+    // }
   }, []);
 
   useEffect(() => {
